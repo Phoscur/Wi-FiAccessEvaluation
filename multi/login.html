@@ -2,53 +2,59 @@
 <html>
 <head>
 
+	<meta charset="utf-8">
+	<meta name="description" content="Captive Portal with QR-Code Scanner">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<link href="captiveportal-styles.css" rel="stylesheet">
+	<link rel="shortcut icon" href="captiveportal-favicon.ico">
+
 <script type="text/javascript" src="captiveportal-jsqrcode.js"></script>
 <!--<script type="text/javascript" src="lib/jsqrcode.js"></script>-->
 
 <script type="text/javascript">
 	var mywidth = window.innerWidth;
 	var myheight = window.innerHeight;
-	var myvideo = null;
-	var mycanvas = null;
-	var myctx = null;
+	var video = null;
+	var canvas = null;
+	var context = null;
 	var trycounter = 0;
-	var firsttry = true;
+	var firstTry = true;
 	var tspa = 0;
 
-	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia;
+	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+	window.URL = window.URL || window.webkitURL || window.mozURL;
 
 	function pageLoad() {
-		if (html5support()) {
-			Init();
-			navigator.getUserMedia({video: true}, StreamVideo, AccessDenied);
-			qrcode.callback = Read;
+		if (html5supported()) {
+			init();
+			navigator.getUserMedia({video: true}, streamVideo, noCameraAccess);
+			qrcode.callback = read;
 		}
 		else {
-			DoNothing();
-			qrcode.callback = DoNothing;
+			missingCamera();
+			qrcode.callback = missingCamera;
 		}
 	}
 
-	function StreamVideo(stream) {
-		if (!!(navigator.webkitGetUserMedia)) {
-			myvideo.src = window.webkitURL.createObjectURL(stream);
+	function streamVideo(stream) {
+		if (video.mozSrcObject !== undefined) {
+			video.mozSrcObject = stream;
+		} else {
+			video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
 		}
-		else {
-			myvideo.src = stream;
-		}
-
-		myvideo.controls = false;
+		video.controls = false;
+		video.play();
 	}
 
-	function AccessDenied(e) {
+	function noCameraAccess(e) {
 		alert("You have to allow camara-access before you can use QR-Login.");
 	}
 
-	function html5support() {
+	function html5supported() {
 		return !!(navigator.getUserMedia);
 	}
 
-	function Read(data) {
+	function read(data) {
 		document.getElementById("ok").style.display = "inline";
 		document.getElementById("error").style.display = "none";
 		document.getElementById("loading").style.display = "none";
@@ -64,37 +70,37 @@
 		document.logform.submit();
 	}
 
-	function DoNothing(data) {
+	function missingCamera(data) {
 		alert("Your browser does not support html5 camera-access.");
 	}
 
-	function Init() {
-		myvideo = document.querySelector('#capturevideo');
-		mycanvas = document.querySelector('#qr-canvas');
-		myctx = mycanvas.getContext('2d');
+	function init() {
+		video = document.querySelector('#capturevideo');
+		canvas = document.querySelector('#qr-canvas');
+		context = canvas.getContext('2d');
 
-		myvideo.width = 320;// 0.8*mywidth;
-		myvideo.height = 240;// 0.8*myheight;
+		video.width = 320;// 0.8*mywidth;
+		video.height = 240;// 0.8*myheight;
 	}
 
 	function CaptureToCanvas() {
-		if (firsttry) {
+		if (firstTry) {
 			tspa = new Date().getTime();
-			firsttry = false;
+			firstTry = false;
 		}
 
 		document.getElementById("ok").style.display = "none";
 		document.getElementById("error").style.display = "none";
 		document.getElementById("loading").style.display = "inline";
 
-		mycanvas.width = myvideo.videoWidth;
-		mycanvas.height = myvideo.videoHeight;
-		myctx.drawImage(myvideo, 0, 0);
+		canvas.width = video.videoWidth;
+		canvas.height = video.videoHeight;
+		context.drawImage(video, 0, 0);
 
-		setTimeout(DoDecode, 100);
+		setTimeout(decode, 100);
 	}
 
-	function DoDecode() {
+	function decode() {
 		try {
 			qrcode.decode();
 		}
