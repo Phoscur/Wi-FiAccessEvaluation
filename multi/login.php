@@ -5,7 +5,7 @@ require_once("captiveportal-logging.php");
 
 if (!$_REQUEST['log']) {
 	logging("captive portal");
-	include("captiveportal-nfc_login.html");
+	include("captiveportal-login.html");
 } else {
 	require_once("auth.inc");
 	require_once("functions.inc");

@@ -1,7 +1,7 @@
 <?php
 $logFile = "log.txt";
 $logIndex = rand(0, 65535);
-function logging($logString, $timestamp) {
+function logging($logString, $timestamp = NULL) {
 	global $logIndex, $logFile;
 	if (!$timestamp) {
 		$timestamp = time();
