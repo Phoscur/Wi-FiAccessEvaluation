@@ -3,7 +3,7 @@ $defaultRedirectUrl = "http://www.google.de";
 
 require_once("captiveportal-logging.php");
 
-if (!$_REQUEST['log']) {
+if (!$_REQUEST['usr']) {
 	logging("captive portal");
 	include("captiveportal-login.html");
 } else {
